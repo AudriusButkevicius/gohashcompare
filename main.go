@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"hash"
 	"os"
 	"os/exec"
+	"runtime"
 	"testing"
 
 	"crypto/rand"
@@ -51,12 +53,16 @@ func wrap(hasher hash.Hash) func(*testing.B) {
 
 func main() {
 	if len(os.Args) == 1 {
-		cmd := exec.Command(os.Args[0], "-test.bench=.*")
+		cmd := exec.Command(os.Args[0], "-test.bench=.*", "-test.benchmem=true")
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.Run()
 		return
 	}
+
+	fmt.Printf("Build: %s %s-%s\n", runtime.Version(), runtime.GOOS, runtime.GOARCH)
+
+	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	hashers := map[string]hash.Hash{
 		"SHA256":               sha256.New(),
@@ -70,7 +76,7 @@ func main() {
 		"Skein 256":            must(skein.New(skein.Skein256, 1<<8)),
 		"Skein 512":            must(skein.New(skein.Skein512, 1<<8)),
 		"Skein 1024":           must(skein.New(skein.Skein1024, 1<<8)),
-		"Blake2b CGO 256":      New(&blake2bcgo.Config{Size: 32}),
+		"Blake2b CGO 256":      blake2cgo.New(&blake2cgo.Config{Size: 32}),
 		"Blake2b CGO 512":      blake2cgo.NewBlake2B(),
 	}
 
