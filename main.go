@@ -20,7 +20,7 @@ import (
 	"github.com/AudriusButkevicius/gohashcompare/crypto/blake2bmodified"
 	"github.com/AudriusButkevicius/gohashcompare/crypto/blake2smodified"
 
-	"github.com/AudriusButkevicius/gohashcompare/crypto/blake2cgo"
+	blake2cgo "github.com/AudriusButkevicius/blake2b-opt"
 )
 
 var hashvalue = make([]byte, 64)
@@ -76,7 +76,6 @@ func main() {
 		"Skein 256":            must(skein.New(skein.Skein256, 1<<8)),
 		"Skein 512":            must(skein.New(skein.Skein512, 1<<8)),
 		"Skein 1024":           must(skein.New(skein.Skein1024, 1<<8)),
-		"Blake2b CGO 256":      blake2cgo.New(&blake2cgo.Config{Size: 32}),
 		"Blake2b CGO 512":      blake2cgo.NewBlake2B(),
 	}
 
