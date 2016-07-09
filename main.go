@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"sort"
 	"testing"
 
 	"crypto/rand"
@@ -20,7 +21,7 @@ import (
 	"github.com/AudriusButkevicius/gohashcompare/crypto/blake2bmodified"
 	"github.com/AudriusButkevicius/gohashcompare/crypto/blake2smodified"
 
-	blake2cgo "github.com/AudriusButkevicius/blake2b-opt"
+	blake2bsimd "github.com/AudriusButkevicius/gohashcompare/crypto/blake2bsimd"
 )
 
 var hashvalue = make([]byte, 64)
@@ -76,14 +77,22 @@ func main() {
 		"Skein 256":            must(skein.New(skein.Skein256, 1<<8)),
 		"Skein 512":            must(skein.New(skein.Skein512, 1<<8)),
 		"Skein 1024":           must(skein.New(skein.Skein1024, 1<<8)),
-		"Blake2b CGO 512":      blake2cgo.NewBlake2B(),
+		"Blake2b 256 SIMD":     blake2bsimd.New256(),
+		"Blake2b 512 SIMD":     blake2bsimd.New512(),
 	}
 
+	var keys []string
+	for key := range hashers {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys)
+
 	benchmarks := []testing.InternalBenchmark{}
-	for name, hash := range hashers {
+	for _, name := range keys {
 		benchmarks = append(benchmarks, testing.InternalBenchmark{
 			Name: name,
-			F:    wrap(hash),
+			F:    wrap(hashers[name]),
 		})
 	}
 	testing.Main(func(pat, str string) (bool, error) {
